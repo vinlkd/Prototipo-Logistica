@@ -18,7 +18,7 @@ Em produção, é necessário um serviço Node persistente, HTTPS e proxy de `/a
 
 ## Conduzir a simulação
 
-O modo Interativo é o padrão. Ao entrar na conta, o simulador abre no Recebimento; clique em Iniciar para começar o ciclo. O modo Interativo continua disponível: nele, use o botão da cena ou do painel para autorizar uma operação por vez. A máquina termina essa operação e espera o próximo comando. Na linha integrada em modo Interativo, passe pelos setores para liberar as operações quando receberem material. A montagem de cabo/alças faz parte da produção. Sensores, proteção, obstrução e emergência afetam o ciclo. Não há conexão com CLP externo nesta versão.
+O modo Automático é o padrão. Ao entrar na conta, o simulador abre no Recebimento; clique em Iniciar para começar o ciclo. O modo Interativo continua disponível: nele, use o botão da cena ou do painel para autorizar uma operação por vez. A máquina termina essa operação e espera o próximo comando. Na linha integrada em modo Interativo, passe pelos setores para liberar as operações quando receberem material. A montagem de cabo/alças faz parte da produção. Sensores, proteção, obstrução e emergência afetam o ciclo. Não há conexão com CLP externo nesta versão.
 
 ## Verificar
 
@@ -30,3 +30,10 @@ Novos cadastros exigem matrícula única (3–30 letras, números ou hífens), p
 
 O servidor limita tentativas de login, cadastro e recuperação, além do total por origem de conexão. Ao receber HTTP 429, o formulário aguarda o prazo `Retry-After` e mostra a contagem para tentar novamente. Os limites são aplicados no servidor mesmo se o formulário for contornado. Veja server/README.md para os valores e limites operacionais.
 
+### Cinemática e passagens
+
+A altura das peças usa a superfície de apoio e o fundo real da geometria. Na prensa, matriz e punção seguem a conformação, depois a peça é ejetada ao nível dos roletes antes da montagem de cabo/alças. Todas as panelas ficam giradas 90° e os roletes giram pelo deslocamento da peça. A embalagem é dimensionada pelo envelope do modelo, incluindo os cabos, com folga interna e cabeçote recolhido durante o transporte. A estrutura da embalagem deixa livres as entradas e saídas, inclusive para as abas abertas.
+
+Estoque usa garfos: elevar, guardar no endereço, recuar, recolher e descer. A caixa passa a repousar nos apoios da prateleira enquanto os garfos recuam. O estoque final exibe somente caixas. A expedição preenche os endereços mais profundos primeiro, com plataforma de doca e três níveis de apoio no caminhão.
+
+Colisores da estrutura verificam o volume varrido pela peça entre quadros e bloqueiam o movimento se a passagem não estiver livre. Ferramentas seguem percursos de contato e recolhimento definidos para os modelos. Os testes verificam apoio, continuidade dos trajetos, folga de caixas/cabos, ferramentas e carregamento sem sobreposição. A câmera inicial fica centralizada e elevada na frente da bancada; as docas usam a mesma orientação com enquadramento ampliado.

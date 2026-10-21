@@ -29,8 +29,8 @@ root.innerHTML=`
 const $=selector=>document.querySelector(selector);
 const panelToggle=document.createElement('button');panelToggle.id='toggle-panel';panelToggle.setAttribute('aria-label','Expandir painel de operação');panelToggle.setAttribute('aria-expanded','false');panelToggle.innerHTML=icon('plus');$('.inspector-tabs').append(panelToggle);
 panelToggle.onclick=()=>{const open=$('.workspace').classList.toggle('panel-open');panelToggle.setAttribute('aria-expanded',String(open));panelToggle.setAttribute('aria-label',open?'Recolher painel':'Expandir painel de operação');panelToggle.innerHTML=icon(open?'minus':'plus');};
-let selected='production';
-const simulation=createSimulation(12,{scope:'bench',environment:selected,mode:'guided'});
+let selected='receiving';
+const simulation=createSimulation(12,{scope:'bench',environment:selected,mode:'auto'});
 let view=null,lastTime=performance.now(),lastUi=0,lastEvent=0,activeTab='operation';
 const timeLabel=time=>`${String(Math.floor(time/60)).padStart(2,'0')}:${String(Math.floor(time%60)).padStart(2,'0')}`;
 function text(selector,value){const element=$(selector);if(element&&element.textContent!==String(value))element.textContent=String(value);}
