@@ -1,1 +1,1 @@
-import './simulator/app.js';
+import './auth.js';
