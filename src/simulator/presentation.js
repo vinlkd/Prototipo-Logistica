@@ -2,7 +2,7 @@ const clamp=value=>Math.max(0,Math.min(1,value));
 export function getPresentation(cell){
   const step=cell.stage?.id??'idle',t=clamp(cell.stage?.progress??0),material=cell.unit?.material??'';
   const isBox=/box/.test(material)||['finished','shipping'].includes(cell.id);
-  let form=/bowl|box/.test(material)?1:0,head=0,fixation=0,eject=0,lift=0,polish=/polished|approved|boxed|picked|shipped/.test(material)?1:0;
+  let form=/pot|box/.test(material)?1:0,head=0,fixation=0,eject=0,lift=0,polish=/polished|approved|boxed|picked|shipped/.test(material)?1:0;
   if(cell.id==='production'){
     if(step==='clamp')fixation=t;
     if(['down','draw','up'].includes(step))fixation=1;

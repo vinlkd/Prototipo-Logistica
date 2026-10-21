@@ -1,5 +1,5 @@
 # Laboratório virtual de Logística SENAI
 
-Oito setores industriais em Three.js, com transporte, transformação de peças, embalagem e expedição.
+Selecione panela de cabo, caçarola ou frigideira e acompanhe o lote nos oito setores. A operação interativa exige autorização a cada etapa; os modos automático e manual também estão disponíveis.
 
-Execute `npm install` e `npm run dev`. Use `npm test` para verificar os processos.
+Execute `npm install`, `npm run dev`, `npm test` e `npm run build`.

@@ -1,3 +1,4 @@
+import {getProduct} from './products.js';
 import * as THREE from 'three';
 import {getPresentation} from './presentation.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -8,7 +9,7 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#3d5060');scene.fog=new THREE.Fog('#3d5060',32,70);
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#dce4ed');scene.fog=new THREE.Fog('#dce4ed',32,70);
   const environment=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),env=pmrem.fromScene(environment,.04);
   scene.environment=env.texture;scene.environmentIntensity=.65;environment.dispose();pmrem.dispose();
   scene.add(new THREE.HemisphereLight('#cfdef0','#43525e',1.65));
@@ -18,10 +19,10 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
   const camera=new THREE.PerspectiveCamera(43,1,.1,100);camera.position.set(9,6,10);
   const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.08;controls.target.set(0,1.1,0);controls.minDistance=5;controls.maxDistance=30;controls.maxPolarAngle=Math.PI*.49;controls.update();
   const mat=(color,metalness=0,roughness=.7)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
-  const m={blue:mat('#194c91',.25,.43),white:mat('#b2c2cf',.2,.48),steel:mat('#adbcc5',.82,.24),dark:mat('#273541',.45,.48),belt:mat('#343e43',.1,.85),yellow:mat('#dfb249',.25,.48),box:mat('#b38d5e',0,.9),tape:mat('#d8c2a1'),wood:mat('#9b774c'),glass:new THREE.MeshStandardMaterial({color:'#a7d1df',transparent:true,opacity:.17,roughness:.12,metalness:.2}),green:mat('#41816f')};
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),mat('#53616d',0,.98));ground.rotation.x=-Math.PI/2;ground.position.y=-.08;ground.receiveShadow=true;scene.add(ground);
-  const grid=new THREE.GridHelper(40,40,'#637787','#5b6e7e');grid.position.y=-.065;grid.material.transparent=true;grid.material.opacity=.35;scene.add(grid);
-  const modelCache=new Map();let selected=null,pointerStart=null;
+  const m={blue:mat('#164193',.25,.43),white:mat('#b2c2cf',.2,.48),steel:mat('#adbcc5',.82,.24),dark:mat('#273541',.45,.48),belt:mat('#343e43',.1,.85),yellow:mat('#dfb249',.25,.48),box:mat('#b38d5e',0,.9),tape:mat('#d8c2a1'),wood:mat('#9b774c'),glass:new THREE.MeshStandardMaterial({color:'#a7d1df',transparent:true,opacity:.17,roughness:.12,metalness:.2}),green:mat('#41816f')};
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),mat('#cdd7e2',0,.98));ground.rotation.x=-Math.PI/2;ground.position.y=-.08;ground.receiveShadow=true;scene.add(ground);
+  const grid=new THREE.GridHelper(40,40,'#bac8d4','#cfdae3');grid.position.y=-.065;grid.material.transparent=true;grid.material.opacity=.35;scene.add(grid);
+  const modelCache=new Map();let selected=null,pointerStart=null,product=getProduct('saucepan');
   const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
   function box(group,x,y,z,w,h,d,material=m.blue,rounded=false){const geometry=rounded?new RoundedBoxGeometry(w,h,d,2,.07):new THREE.BoxGeometry(w,h,d);const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;}
   function cyl(group,x,y,z,r,h,material=m.steel){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;}
@@ -30,14 +31,25 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
   function pallet(group,x,z,loaded=true){for(const dx of [-.55,0,.55])box(group,x+dx,.12,z,.15,.24,1.3,m.wood);for(let dz=-.55;dz<.6;dz+=.28)box(group,x,.28,z+dz,1.6,.09,.2,m.wood);if(loaded)for(const dx of [-.38,.38])for(let y=0;y<2;y++)carton(group,x+dx,.6+y*.56,z,.7);}
   function rack(group,x,z,raw=false){for(const dx of [-1.9,1.9])for(const dz of [-.7,.7])box(group,x+dx,1.9,z+dz,.1,3.8,.1,m.blue);for(const y of [.35,1.6,2.85]){box(group,x,y,z,4,.12,1.6,m.yellow);for(const dx of [-1.25,0,1.25])if(raw){for(let j=0;j<5;j++)box(group,x+dx,y+.1+j*.05,z,.95,.025,1.1,m.steel);}else carton(group,x+dx,y+.45,z,1.05);}}
   function pot(group,morph=false){
-    const profile=[[.001,-.18],[.08,-.18],[.2,-.18],[.3,-.17],[.34,-.13],[.365,-.06],[.395,.04],[.425,.13],[.455,.2],[.46,.21]];
+    const r=product.rim,h=product.height;const profile=[[.001,-.18],[.08,-.18],[.2,-.18],[r*.72,-.17],[r*.8,-.12],[r*.86,-.06],[r*.91,h*.25],[r*.95,h*.62],[r*.99,h*.96],[r,h]];
     const flat=profile.map((point,i)=>new THREE.Vector2(.001+i/(profile.length-1)*.619,.21));
     const geometry=new THREE.LatheGeometry(flat,48),formed=new THREE.LatheGeometry(profile.map(point=>new THREE.Vector2(...point)),48);
     geometry.morphAttributes.position=[formed.attributes.position];geometry.morphAttributes.normal=[formed.attributes.normal];
     const metal=m.steel.clone();metal.side=THREE.DoubleSide;
     const bowl=new THREE.Mesh(geometry,metal);bowl.castShadow=true;bowl.receiveShadow=true;bowl.morphTargetInfluences[0]=morph?0:1;group.add(bowl);
-    const rim=new THREE.Mesh(new THREE.TorusGeometry(.46,.009,8,48),metal);rim.rotation.x=Math.PI/2;rim.position.y=.21;group.add(rim);
-    return {bowl,rim,metal};
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(product.rim,.014,8,48),metal);rim.rotation.x=Math.PI/2;rim.position.y=morph?.21:product.height;group.add(rim);
+    const handles=new THREE.Group();group.add(handles);
+    if(product.handles==='long'){
+      box(handles,product.rim+.14,product.height-.07,0,.3,.065,.13,m.steel,true);
+      const grip=box(handles,product.rim+.61,product.height-.03,0,.72,.12,.19,m.dark,true);grip.rotation.z=.07;
+      for(const z of [-.07,.07])cyl(handles,product.rim-.015,product.height-.06,z,.025,.05,m.steel);
+    }else for(const side of [-1,1]){
+      bar(handles,[side*product.rim,product.height-.1,-.16],[side*(product.rim+.27),product.height-.04,-.16],.045,m.steel);
+      bar(handles,[side*(product.rim+.27),product.height-.04,-.16],[side*(product.rim+.27),product.height-.04,.16],.05,m.dark);
+      bar(handles,[side*(product.rim+.27),product.height-.04,.16],[side*product.rim,product.height-.1,.16],.045,m.steel);
+    }
+    handles.visible=!morph;
+    return {bowl,rim,metal,handles};
   }
   function foldingBox(root){
     const group=new THREE.Group();root.add(group);box(group,0,.015,0,1.07,.035,.9,m.box);
@@ -125,6 +137,10 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
     const tower=new THREE.Group();tower.position.set(1.9,2.8,-1.1);root.add(tower);
     cyl(tower,0,0,0,.035,.8,m.steel);
     const lamps={};for(const [i,key,color]of [[0,'red','#b54d48'],[1,'amber','#bd9b4d'],[2,'green','#4d8e76']])lamps[key]=cyl(tower,0,.55-i*.2,0,.1,.16,new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.05}));
+    const inspection=new THREE.Group();root.add(inspection);
+    const scanPlane=box(inspection,0,1.55,0,1.4,.025,1.2,new THREE.MeshBasicMaterial({color:'#168bd2',transparent:true,opacity:.4,depthWrite:false}));
+    const result=box(inspection,0,2.15,-.85,1.15,.55,.08,new THREE.MeshStandardMaterial({color:'#8795a5',emissive:'#000000'}));
+    const sample=new THREE.Group();root.add(sample);sample.position.set(3.7,.95,-2.9);pot(sample);box(root,3.7,.45,-2.9,2,.9,1.6,m.white,true);
     const packingBox=foldingBox(root);
     const inputSamples=[],outputSamples=[];
     for(let i=0;i<8;i++){
@@ -137,7 +153,7 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
     }
     const loaded=new THREE.Group();root.add(loaded);const loadedBoxes=[];
     for(let i=0;i<12;i++){const c=new THREE.Group();carton(c,0,0,0,.78);c.position.set(6.5+Math.floor(i/4)*.86,1.5+(Math.floor(i/2)%2)*.56,(i%2-.5)*.9);loaded.add(c);loadedBoxes.push(c);}
-    const model={id,root,head,wheel,lift,scanner,pusher,guard,ram,platform,clamps,sensors,unformed,shaped,packed,bowl,packingBox,inputSamples,outputSamples,loaded,loadedBoxes,lamps,operatingTime:0};modelCache.set(id,model);return model;
+    const model={inspection,scanPlane,result,id,root,head,wheel,lift,scanner,pusher,guard,ram,platform,clamps,sensors,unformed,shaped,packed,bowl,packingBox,inputSamples,outputSamples,loaded,loadedBoxes,lamps,operatingTime:0};modelCache.set(id,model);return model;
   }
   function select(id){if(selected)selected.root.visible=false;selected=modelCache.get(id)??build(id);selected.root.visible=true;setView('iso');}
   function setView(view){const dock=['receiving','shipping'].includes(selected?.id);const positions={iso:dock?[12,8,15]:[8.5,6,10],front:[0,3.6,dock?20:14],top:[.01,dock?22:16,.01],rear:[-10,6,-10]};camera.position.set(...(positions[view]??positions.iso));controls.target.set(0,1.35,0);if(view==='iso'&&!dock&&camera.aspect>1.9)camera.position.sub(controls.target).multiplyScalar(.7).add(controls.target);controls.update();}
@@ -160,7 +176,8 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
     const y=(p.form>0?1.35:rawHeight)+p.eject+p.lift;
     model.shaped.position.set(p.x,y,p.z);model.packed.position.set(p.x,1.52+p.lift,p.z);
     model.bowl.bowl.morphTargetInfluences[0]=p.form;
-    model.bowl.rim.scale.setScalar((.62+(.46-.62)*p.form)/.46);
+    model.bowl.rim.scale.setScalar((.62+(product.rim-.62)*p.form)/product.rim);model.bowl.rim.position.y=.21+(product.height-.21)*p.form;
+    const assembling=cell.stage?.id==='handles';model.bowl.handles.visible=p.form>.99&&(cell.id!=='production'||cell.phase==='unloading'||assembling||cell.stage?.id==='eject');model.bowl.handles.scale.setScalar(assembling?Math.max(.001,p.t):1);
     model.bowl.metal.roughness=.65-p.polish*.47;model.bowl.metal.color.set(p.polish>.5?'#c7d3dc':'#8b9daa');
     model.shaped.rotation.y=cell.id==='finishing'&&p.step==='polish'?model.operatingTime*2:0;
     if(model.head)model.head.position.y=(cell.id==='production'?3.1:2.6)-p.head*(cell.id==='production'?.8:.8);
@@ -172,15 +189,20 @@ export function createLabScene(canvas,onSensorPick=()=>{}){
     if(model.scanner){model.scanner.visible=cell.outputs.work&&p.step==='scan';model.scanner.position.z=-.6+p.t*1.2;}
     if(model.pusher)model.pusher.position.z=-1.2+(cell.phase==='processing'?Math.sin(p.t*Math.PI)*.4:0);
     if(model.guard)model.guard.position.y=cell.guard?cell.id==='production'?2.5:2:4.6;
+    const checking=['identify','locate','scan','check','approve','release'].includes(p.step)&&['receiving','raw','finished','quality','shipping'].includes(cell.id);
+    model.inspection.visible=cell.part&&cell.phase==='processing'&&checking;
+    model.scanPlane.visible=checking;model.scanPlane.position.z=-.65+p.t*1.3;
+    model.result.material.color.set(p.step==='approve'||p.step==='release'?'#249b70':p.t>.5?'#168bd2':'#e5a43a');
+    model.result.scale.x=.2+.8*p.t;
     const carton=model.packingBox;carton.group.visible=cell.id==='packing'&&cell.part&&cell.phase!=='feeding';carton.group.position.set(p.x,1.17,p.z);
     for(const wall of carton.walls)wall.object.rotation[wall.axis]=wall.open*(1-p.walls);
     for(const flap of carton.flaps){flap.object.visible=p.walls>.99;flap.object.rotation.x=flap.open*(1-p.flaps);}
-    carton.tape.visible=p.tape>0;carton.tape.scale.z=Math.max(.001,p.tape);carton.label.visible=p.tape>.7;carton.foam.visible=!!p.foam;
+    carton.tape.visible=p.tape>0;carton.tape.scale.z=Math.max(.001,p.tape);carton.label.visible=p.tape>.7;carton.foam.visible=p.foam>0;carton.foam.scale.setScalar(Math.max(.001,p.foam));
     for(let i=0;i<8;i++){model.inputSamples[i].visible=['receiving','raw','production'].includes(cell.id)&&i<cell.queue;model.outputSamples[i].visible=scope==='bench'&&['production','packing'].includes(cell.id)&&i<cell.done;}
     model.loaded.visible=cell.id==='shipping';for(let i=0;i<model.loadedBoxes.length;i++)model.loadedBoxes[i].visible=i<cell.done;
     for(const [key,indicator]of Object.entries(model.sensors))indicator.material.color.set(cell.inputs[key]?'#62e4bd':'#364b60');
     const states={red:emergency||!cell.guard||cell.fault,amber:!running,green:running&&!cell.fault&&cell.guard};
     for(const [key,lamp]of Object.entries(model.lamps))lamp.material.emissiveIntensity=states[key]?1.7:.04;
   }
-  return {select,setView,update,hotspots(){return [[-4.2,1.6,0],[0,4.5,0],[4.4,1.6,0]].map(p=>{const v=new THREE.Vector3(...p).project(camera);return {x:(v.x+1)*50,y:(1-v.y)*50,visible:v.z<1};});},render(){controls.update();renderer.render(scene,camera);},zoom(factor){camera.position.sub(controls.target).multiplyScalar(factor).add(controls.target);controls.update();},dispose(){observer.disconnect();controls.dispose();renderer.dispose();env.texture.dispose();},get camera(){return camera;}};
+  return {setProduct(id){product=getProduct(id);const current=selected?.id;for(const model of modelCache.values()){scene.remove(model.root);model.root.traverse(object=>object.geometry?.dispose());}modelCache.clear();selected=null;if(current)select(current);},select,setView,update,hotspots(){return [[-4.2,1.6,0],[0,4.5,0],[4.4,1.6,0]].map(p=>{const v=new THREE.Vector3(...p).project(camera);return {x:(v.x+1)*50,y:(1-v.y)*50,visible:v.z<1};});},render(){controls.update();renderer.render(scene,camera);},zoom(factor){camera.position.sub(controls.target).multiplyScalar(factor).add(controls.target);controls.update();},dispose(){observer.disconnect();controls.dispose();renderer.dispose();env.texture.dispose();},get camera(){return camera;}};
 }

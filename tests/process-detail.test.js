@@ -15,8 +15,8 @@ test('a prensa posiciona, fixa, conforma, retorna e só então libera a mesma un
     if(c.stage?.id==='up')assert.equal(pose.form,1);
     if(sim.snapshot.done)break;
   }
-  assert.deepEqual(order,['feed','clamp','down','draw','up','eject','transfer']);assert.equal(gradual,true);
-  assert.equal(sim.snapshot.completedUnits[0].id,'UT-001');assert.equal(sim.snapshot.completedUnits[0].material,'formed-bowl');
+  assert.deepEqual(order,['feed','clamp','down','draw','up','handles','eject','transfer']);assert.equal(gradual,true);
+  assert.equal(sim.snapshot.completedUnits[0].id,'UT-001');assert.equal(sim.snapshot.completedUnits[0].material,'formed-pot');
 });
 test('a emergência preserva também a forma intermediária da peça',()=>{
   const sim=createSimulation(1,{scope:'bench',environment:'production'});sim.start();
@@ -26,7 +26,7 @@ test('a emergência preserva também a forma intermediária da peça',()=>{
   const after=getPresentation(sim.snapshot.cells[2]);assert.equal(after.form,before.form);assert.equal(after.head,before.head);
   sim.acknowledge();sim.start();sim.step(.2);assert.ok(getPresentation(sim.snapshot.cells[2]).form>before.form);
 });
-test('cada tigela conserva o identificador e todo o histórico até a expedição',()=>{
+test('cada panela conserva o identificador e todo o histórico até a expedição',()=>{
   const sim=createSimulation(2);sim.setSpeed(4);sim.start();
   for(let i=0;i<2000&&sim.snapshot.done<2;i++)sim.step(.05);
   const result=sim.snapshot;assert.equal(result.done,2);assert.deepEqual(result.completedUnits.map(u=>u.id),['UT-001','UT-002']);
@@ -42,5 +42,5 @@ test('a caixa levanta as laterais antes de fechar abas e aplicar a fita',()=>{
     if(c.stage?.id==='label'){assert.equal(pose.flaps,1);if(pose.tape>.2&&pose.tape<.8)sealing=true;}
     if(sim.snapshot.done)break;
   }
-  assert.equal(folding,true);assert.equal(sealing,true);assert.equal(sim.snapshot.completedUnits[0].material,'boxed-bowl');
+  assert.equal(folding,true);assert.equal(sealing,true);assert.equal(sim.snapshot.completedUnits[0].material,'boxed-pot');
 });
