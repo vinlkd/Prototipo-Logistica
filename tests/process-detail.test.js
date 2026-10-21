@@ -15,7 +15,7 @@ test('a prensa posiciona, fixa, conforma, retorna e só então libera a mesma un
     if(c.stage?.id==='up')assert.equal(pose.form,1);
     if(sim.snapshot.done)break;
   }
-  assert.deepEqual(order,['feed','clamp','down','draw','up','handles','eject','transfer']);assert.equal(gradual,true);
+  assert.deepEqual(order,['feed','clamp','down','draw','up','eject','handles','transfer']);assert.equal(gradual,true);
   assert.equal(sim.snapshot.completedUnits[0].id,'UT-001');assert.equal(sim.snapshot.completedUnits[0].material,'formed-pot');
 });
 test('a emergência preserva também a forma intermediária da peça',()=>{
