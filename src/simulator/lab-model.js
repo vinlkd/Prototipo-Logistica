@@ -37,17 +37,17 @@ export function buildLabModel({id,product,layout=getLayout(product.id),m,scene=n
  function build(id){
   const root=new THREE.Group();root.position.y=.025;scene.add(root);const solids=[],rollers=[];
   const solid=(x,y,z,w,h,d,material=m.blue)=>{const mesh=box(root,x,y,z,w,h,d,material);solids.push({minX:x-w/2,maxX:x+w/2,minY:y-h/2,maxY:y+h/2,minZ:z-d/2,maxZ:z+d/2,name:'estrutura da máquina'});return mesh;};
-  box(root,0,-.04,0,16,.08,12,mat('#60788b',.1,.85));for(const z of [-5.8,5.8])box(root,0,.025,z,15.6,.012,.05,m.yellow);
+  const dock=['receiving','shipping'].includes(id),floorX=dock?(id==='shipping'?5:-5):0;const floor=box(root,floorX,-.04,0,dock?32:16,.08,12,mat('#60788b',.1,.85));floor.name='sector-floor';for(const z of [-5.8,5.8])box(root,0,.001,z,15.6,.002,.05,m.yellow);
   for(const z of [-2.15,1.5])box(root,0,.87,z,10,.27,.12,m.dark);const gap=['receiving','production','raw','finished','quality','finishing','packing'].includes(id)?.82:0;
   for(let x=-4.8;x<4.9;x+=.3)if(Math.abs(x)>gap&&!(id==='shipping'&&x>2.5)){const roller=bar(root,[x,1.12,-2.1],[x,1.12,1.45],.075);box(roller,.077,0,0,.009,3.5,.012,m.dark);for(const z of [-2.15,1.5])box(root,x,1.0475,z,.15,.085,.12,m.dark);rollers.push(roller);}
   for(const x of [-4.4,-2,2,4.4])for(const z of [-2.15,1.5])box(root,x,.3675,z,.12,.735,.1,m.steel);
-  const sensors={};for(const [key,x]of [['entry',-3.9],['positioned',-.45],['exit',3.8]]){box(root,x,1.16,1.65,.17,.3,.16,m.dark);const led=new THREE.Mesh(new THREE.SphereGeometry(.06,10,8),new THREE.MeshBasicMaterial({color:'#43556a'}));led.position.set(x,1.25,1.74);led.userData.signal=key;root.add(led);sensors[key]=led;}
+  const sensors={};for(const [key,x]of [['entry',-3.9],['positioned',-.45],['exit',3.8]]){box(root,x,.99,1.57,.1,.04,.22,m.steel);box(root,x,1.16,1.65,.17,.3,.16,m.dark);const led=new THREE.Mesh(new THREE.SphereGeometry(.06,10,8),new THREE.MeshBasicMaterial({color:'#43556a'}));led.position.set(x,1.25,1.74);led.userData.signal=key;root.add(led);sensors[key]=led;}
   const active=new THREE.Group();root.add(active);const cookware=pot(active,true),packed=new THREE.Group();root.add(packed);carton(packed);
   const blank=foldingBox(root);let head=null,ram=null,piston=null,platform=null,fork=null,guard=null,truck=null,workstation=null,receiving=null,liftSupport=null,assembler=null,rawLoader=null,ramAnchor=4.3;const clamps=[];
   if(id==='production'){
    box(root,0,.1,0,2.8,.2,3.3,m.blue,true);for(const x of [-1.12,1.12])solid(x,2.15,-2.2,.26,4.3,.3);
    solid(0,4.45,-.6,3,.3,3.5);head=box(root,0,3.3,0,1.7,.26,1.7,m.yellow,true);cyl(head,0,-.7,0,.29,.9,m.steel);ram=cyl(root,0,3.85,0,.18,.8,m.steel);
-   const die=new THREE.Mesh(new THREE.TorusGeometry(.69,.04,10,48),m.steel);die.rotation.x=Math.PI/2;die.position.y=CONVEYOR_TOP-.028;root.add(die);
+   const die=new THREE.Mesh(new THREE.TorusGeometry(.69,.04,10,48),m.steel);die.rotation.x=Math.PI/2;die.position.y=CONVEYOR_TOP-.028;root.add(die);const dieHousing=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.72,48,1,true),m.steel);dieHousing.position.y=CONVEYOR_TOP-.41;root.add(dieHousing);for(const x of [-.5,.5])for(const z of [-.5,.5])cyl(root,x,.3125,z,.05,.225,m.blue);
    platform=cyl(root,0,CONVEYOR_TOP-.04,0,.34,.08,m.steel);piston=cyl(root,0,.65,0,.11,1,m.steel);cyl(root,0,.21,0,.18,.02,m.steel);
    for(const side of [-1,1])clamps.push({object:box(root,side*.86,CONVEYOR_TOP+.05,0,.2,.08,.25,m.dark),side});
    guard=box(root,0,2.4,1.98,2.9,2.4,.025,m.glass);for(const x of [-1.52,4.8])box(root,x,1.85,1.98,.07,3.7,.09,m.steel);box(root,1.64,3.65,1.98,6.4,.08,.1,m.steel);for(const x of [-1.1,1.1])box(guard,x,1.25,0,.13,.14,.14,m.dark);
@@ -60,7 +60,7 @@ export function buildLabModel({id,product,layout=getLayout(product.id),m,scene=n
    for(const z of [rear-depth/2,rear+depth/2]){box(root,0,2.59,z,2.45,.12,.12,m.steel);for(const x of [-layout.package.width*.34,layout.package.width*.34])box(root,x,2.6825,z,.1,.065,.1,m.steel);}
    fork=new THREE.Group();root.add(fork);for(const x of [-.15,.15])box(fork,x,CONVEYOR_TOP-.06,layout.package.centerZ,.14,.12,layout.package.depth+.1,m.steel);
    liftSupport=buildLiftSupport({root,box,cyl,m,layout});
-   for(const x of [-.87,.87])solid(x,2.1,1.95,.12,4.2,.12,m.white);box(root,0,4.2,1.95,1.9,.12,.2,m.blue);
+   for(const x of [-.87,.87])solid(x,2.16,1.95,.12,4.08,.12,m.white);box(root,0,4.2,1.95,1.9,.12,.2,m.blue);
    for(const side of [-1,1])for(let n=0;n<2;n++){const x=side*(2.8+n*1.75);box(root,x,.77,rear,1.55,.12,depth,m.yellow);for(const dx of [-.6,.6])for(const dz of [-depth*.4,depth*.4])box(root,x+dx,.36,rear+dz,.08,.72,.08,m.blue);if(id==='finished')carton(root,x,.83,rear-layout.package.centerZ,.9);}
   }else if(id==='packing'){
    const p=layout.package,front=p.centerZ+p.depth/2+p.height+.35,back=p.centerZ-p.depth/2-p.height-.35,roof=CONVEYOR_TOP+p.height+p.depth/2+.7;
@@ -78,7 +78,7 @@ export function buildLabModel({id,product,layout=getLayout(product.id),m,scene=n
   }
   if(id==='finishing')assembler=buildHandleAssembler({root,THREE,box,cyl,bar,m,product,layout,handles:cookware.handles});
   const inputs=[],outputs=[],cargo=[];
-  if(['receiving','production'].includes(id)){box(root,-5.65,CONVEYOR_TOP-.06,0,1.35,.12,1.45,m.white);for(const dx of [-.54,.54])for(const z of [-.57,.57])box(root,-5.65+dx,(CONVEYOR_TOP-.12)/2,z,.08,CONVEYOR_TOP-.12,.08,m.steel);for(let i=0;i<12;i++){const disc=cyl(root,-5.65,CONVEYOR_TOP+CLEARANCE+.0125+i*.03,0,.6,.025);inputs.push(disc);}}
+  if(['receiving','production'].includes(id)){if(id==='production'){box(root,-5.65,CONVEYOR_TOP-.06,0,1.35,.12,1.45,m.white);for(const dx of [-.54,.54])for(const z of [-.57,.57])box(root,-5.65+dx,(CONVEYOR_TOP-.12)/2,z,.08,CONVEYOR_TOP-.12,.08,m.steel);}for(let i=0;i<12;i++){const disc=cyl(root,-5.65,CONVEYOR_TOP+CLEARANCE+.0125+i*.03,0,.6,.025);inputs.push(disc);}}
   if(id==='raw')for(let pile=0;pile<4;pile++)for(let level=0;level<13;level++){const disc=cyl(root,RAW_PILE_X[pile],.8545+level*.026,-3.6+layout.package.centerZ,.6,.025);disc.userData.pile=pile;disc.userData.level=level;inputs.push(disc);}
   if(id==='packing'){
    box(root,0,.77,-4.3,13,.16,3.3,m.white);for(const x of [-6,-3,0,3,6])for(const z of [-5.65,-2.95])box(root,x,.345,z,.09,.69,.09,m.steel);for(let i=0;i<8;i++){const g=new THREE.Group();root.add(g);g.position.set(-5.5+i*1.55,.85+CLEARANCE,-4.3);if(id==='packing')carton(g);else{g.position.y+=.18;pot(g);}outputs.push(g);}

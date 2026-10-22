@@ -66,3 +66,10 @@ for(const p of PRODUCTS)test(`${p.id}: polimento gira a fixação e percorre a a
  const gasketTop=f.model.gasket.position.y+.006;
  assert.ok(Math.abs(gasketTop-(f.origin-.18))<1e-8);
 });
+
+for(const p of PRODUCTS)test(`${p.id}: ponta esf�rica da sonda respeita o fundo inteiro`,()=>{
+ const f=fixture(p,'quality');
+ updateWorkstation(f.model,{pose:{step:'scan',t:1,y:f.origin,inspectionProbe:1},cell:{part:true,phase:'processing',outputs:{}},product:p,layout:f.layout});
+ const tipBottom=f.model.quality.depthTip.position.y-.02;
+ assert.ok(tipBottom>=f.origin+f.layout.potBottom+.0009);
+});

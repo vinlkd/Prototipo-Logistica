@@ -7,7 +7,7 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
  const windowMat=new THREE.MeshPhysicalMaterial({color:'#375c73',metalness:.15,roughness:.14,clearcoat:1});
  const lamps=new Map();
  const lamp=(color)=>{if(!lamps.has(color))lamps.set(color,new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.8}));return lamps.get(color);};
- const deck=layout.conveyorTop,halfDepth=Math.max(1.6,layout.package.depth/2+.35),roof=4.55;
+ const deck=layout.conveyorTop,halfDepth=Math.max(1.6,layout.package.depth/2+.35),roof=4.55,wallTop=roof-.05;
  box(truck,0,.83,0,6.8,.24,halfDepth*2,m.dark,true);box(truck,0,deck-.07,0,6.8,.14,halfDepth*2,body);
  // A cutaway on the near side keeps loading visible; rear doors are opened away from the route.
  // Continuous roof covers the entire cargo body; the open side preserves visibility.
@@ -15,9 +15,9 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
  roofPanel.name='cargo-roof';
 
  truck.userData.cutaway=true;
- box(truck,0,(roof+deck)/2,-halfDepth,6.8,roof-deck,.07,body);
+ box(truck,0,(wallTop+deck)/2,-halfDepth,6.6,wallTop-deck,.07,body);
  for(let x=-3.2;x<3.4;x+=.32)box(truck,x,(roof+deck)/2,-halfDepth+.045,.025,roof-deck-.12,.015,m.white);
- box(truck,direction*3.35,(roof+deck)/2,0,.1,roof-deck,halfDepth*2,body);
+ box(truck,direction*3.35,(wallTop+deck)/2,0,.1,wallTop-deck,halfDepth*2,body);
  // Small SENAI marks on both faces of the closed side wall.
  const logoTexture=new THREE.TextureLoader().load('/senai-logo.png');
  logoTexture.colorSpace=THREE.SRGBColorSpace;
@@ -30,35 +30,35 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
  }
  const doors=[];
  for(const z of [-halfDepth,halfDepth]){
-  if(z<0)box(truck,-direction*3.38,(roof+deck)/2,z,.1,roof-deck,.1,m.steel);
-  const door=new THREE.Group();door.position.set(-direction*3.44,deck,z);door.rotation.y=(z>0?1:-1)*direction*Math.PI;truck.add(door);doors.push(door);
+  if(z<0)box(truck,-direction*3.38,(wallTop+deck)/2,z,.16,wallTop-deck,.1,m.steel);
+  const door=new THREE.Group();door.position.set(-direction*3.44,deck,z+Math.sign(z)*.09);door.rotation.y=(z>0?1:-1)*direction*Math.PI;truck.add(door);doors.push(door);
   const leaf=halfDepth-.06;
   box(door,-direction*leaf/2,(roof-deck)/2,0,leaf,roof-deck,.07,body);
   bar(door,[-direction*leaf*.75,.2,.055],[-direction*leaf*.75,roof-deck-.2,.055],.024,m.steel);
   for(const height of [.3,(roof-deck)/2,roof-deck-.3])box(door,-direction*.035,height,0,.09,.09,.12,m.dark);
   box(door,-direction*leaf*.75,(roof-deck)*.42,.085,.19,.06,.05,m.dark);
-  box(truck,0,deck+.1,z,6.8,.06,.055,m.steel);
+  box(truck,0,deck+.1,z<0?z+.0625:z,6.6,.06,.055,m.steel);
   for(const x of [-2.8,-1.4,0,1.4,2.8])box(truck,x,.98,z,.2,.06,.025,lamp('#e6a239'));
  }
  // Cab: sloped glass, roof, bumper, grille, lights, doors, mirrors and steps.
  const cab=new THREE.Group();cab.position.x=direction*4.65;truck.add(cab);
  box(cab,0,2.13,0,2.35,1.82,2.85,paint,true);
- box(cab,-direction*.86,.98,0,.57,.47,2.85,paint,true);box(cab,0,3.12,0,2.2,.15,2.9,paint,true);
- const windshield=box(cab,direction*1.19,2.58,0,.035,.9,2.5,windowMat,true);windshield.rotation.z=direction*.12;
- bar(cab,[direction*1.22,2.22,-.96],[direction*1.25,2.72,-.12],.018,m.dark);
- bar(cab,[direction*1.22,2.22,.24],[direction*1.25,2.72,1.02],.018,m.dark);
+ box(cab,-direction*.86,.98,0,.57,.47,2.85,paint,true);box(cab,0,3.115,0,2.2,.15,2.9,paint,true);
+ const windshield=box(cab,direction*1.26,2.58,0,.035,.9,2.5,windowMat,true);windshield.rotation.z=direction*.12;
+ bar(cab,[direction*1.35,2.22,-.96],[direction*1.30,2.72,-.12],.018,m.dark);
+ bar(cab,[direction*1.35,2.22,.24],[direction*1.30,2.72,1.02],.018,m.dark);
  box(cab,direction*1.22,1.48,0,.06,.62,2.35,m.dark,true);
  for(let y=1.25;y<1.8;y+=.1)box(cab,direction*1.26,y,0,.03,.026,1.5,m.steel);
  box(cab,direction*1.26,.99,0,.14,.23,2.8,m.steel,true);
  for(const z of [-1.08,1.08]){
-  box(cab,direction*1.27,1.36,z,.07,.28,.45,lamp('#fff5cf'),true);
+  box(cab,direction*1.295,1.36,z,.07,.28,.45,lamp('#fff5cf'),true);
   box(cab,direction*1.29,1.1,z,.06,.09,.25,lamp('#e6a239'));
-  box(cab,-direction*.1,2.6,z>0?1.44:-1.44,1.45,.78,.035,windowMat,true);
+  box(cab,-direction*.1,2.6,z>0?1.4525:-1.4525,1.45,.78,.035,windowMat,true);
   box(cab,-direction*.25,1.94,z>0?1.45:-1.45,1.4,.025,.015,m.dark);
   box(cab,-direction*.62,2.12,z>0?1.47:-1.47,.23,.045,.03,m.dark,true);
   bar(cab,[direction*.9,2.65,z>0?1.44:-1.44],[direction*.9,2.65,z>0?1.84:-1.84],.035,m.dark);
   box(cab,direction*.88,2.47,z>0?1.86:-1.86,.21,.45,.13,m.dark,true);
-  box(cab,-direction*.75,.8,z>0?1.44:-1.44,.55,.08,.35,m.steel);
+  box(cab,-direction*.75,.8,z>0?1.6:-1.6,.55,.08,.35,m.steel);
  }
  box(truck,direction*2.2,.64,0,.7,.45,2.3,m.steel,true);
  const tank=cyl(truck,direction*3.05,.6,0,.29,1.9,m.steel);tank.rotation.x=Math.PI/2;
@@ -75,11 +75,12 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
  const wheels=[];
  for(const x of [-direction*2.35,-direction*.95,direction*4.8])for(const side of [-1,1]){
   const front=Math.abs(x-direction*4.8)<.01,z=side*(front?1.39:halfDepth); 
-  const wheel=new THREE.Group();wheel.position.set(x,.55,z);truck.add(wheel);wheels.push(wheel);
+  const wheel=new THREE.Group();wheel.position.set(x,.54,z);truck.add(wheel);wheels.push(wheel);
   const tire=cyl(wheel,0,0,0,.54,.34,rubber);tire.rotation.x=Math.PI/2;
   const arch=new THREE.Mesh(new THREE.TorusGeometry(.62,.047,8,32,Math.PI),m.dark);arch.position.set(0,0,side*.06);wheel.add(arch);
+  wheel.name='Conjunto de roda';
   const hub=cyl(wheel,0,0,z>0?.18:-.18,.3,.025,m.steel);hub.rotation.x=Math.PI/2;
-  for(let i=0;i<12;i++){const tread=box(wheel,Math.sin(i*Math.PI/6)*.53,Math.cos(i*Math.PI/6)*.53,0,.1,.04,.36,rubber);tread.rotation.z=-i*Math.PI/6;}
+  for(let i=0;i<12;i++){const tread=box(wheel,Math.sin(i*Math.PI/6)*.515,Math.cos(i*Math.PI/6)*.515,0,.08,.025,.36,rubber);tread.rotation.z=-i*Math.PI/6;}
   for(let i=0;i<6;i++){const bolt=cyl(wheel,Math.sin(i*Math.PI/3)*.18,Math.cos(i*Math.PI/3)*.18,z>0?.2:-.2,.025,.03,m.dark);bolt.rotation.x=Math.PI/2;}
  }
  box(truck,-direction*3.5,.75,0,.16,.16,halfDepth*2,m.steel);

@@ -27,7 +27,7 @@ export function buildHandleAssembler({root,THREE,box,cyl,bar,m,product,layout,ha
   for(const side of [-1,1])box(group,cx+side*(width/2-.025),seatTop+.06,cz,.045,.12,depth,m.blue);
   // Rear mast and telescopic arm stay behind the press columns. The low tool
   // boom reaches the handles below the retracted punch, rather than through it.
-  const mast=box(group,2.75,1.95,pickupZ,.14,3.9,.16,m.blue);
+  const mast=box(group,2.75,1.88,pickupZ,.14,3.76,.16,m.blue);
   const rail=box(group,1.35,3.82,pickupZ,3,.12,.16,m.steel);
   const saddle=box(group,pickupX,3.82,pickupZ,.22,.2,.24,m.yellow);
   const vertical=bar(group,[pickupX,1.5,pickupZ],[pickupX,3.82,pickupZ],.035,m.steel);
@@ -44,7 +44,7 @@ export function buildHandleAssembler({root,THREE,box,cyl,bar,m,product,layout,ha
     }
     const driver=cyl(tool,0,.17,.115,.035,.18,m.steel);
     const bit=cyl(tool,0,.045,.115,.009,.08,m.dark);
-    const boom=box(group,pickupX,2,pickupZ,.08,.07,.1,m.steel);
+    const boom=box(group,pickupX,2,pickupZ,.08,.05,.1,m.steel);
     tools.push({tool,point,fingers,driver,bit,boom});
   }
   const model={group,carrier,gripper,handles,tools,localBounds:local,rotatedBounds:rotated,tray,mast,rail,saddle,vertical,pickupX,pickupZ,supplyY,seatTop,

@@ -90,8 +90,8 @@ export function buildWorkstation({id,root,THREE,box,cyl,bar,m,product,layout}) {
     const slide=new THREE.Group(); slide.position.set(side*openX,origin+contactY,z); group.add(slide);
     const pad=box(slide,0,0,0,.09,.07,.09,m.dark); pad.name='Garra de apoio';
     box(slide,side*.1,-.02,0,.18,.045,.055,m.steel);
-    box(slide,0,-.14,0,.055,.21,.055,m.steel);
-    box(group,side*openX/2,top-.1,z,openX+.2,.07,.09,m.steel);
+    box(slide,0,-.08725,0,.055,.0895,.055,m.steel);
+    if(id==='quality'&&side===-1)box(group,0,top-.1,z,2*openX+.2,.07,.09,m.steel);
     if(id==='finishing')slide.visible=false;
     jaws.push({slide,side,openX,closedX:jawContact});
   }
@@ -153,7 +153,7 @@ export function buildWorkstation({id,root,THREE,box,cyl,bar,m,product,layout}) {
     const nominalDiameter=Number.parseFloat(product.size)*10;
     const scale=nominalDiameter/(product.rim*2);
     model.quality={carriage,sideProbes,depth,depthTip,indicators,bridgeY,rear,extension:0,travel:0,
-      nominal:{diameter:nominalDiameter,height:(product.height-bottom)*scale,depth:(product.height-bottom-.018)*scale}};
+      nominal:{diameter:nominalDiameter,height:(product.height-bottom)*scale,depth:(product.height-bottom-.021)*scale}};
   }
   updateWorkstation(model,{pose:{step:'idle',t:0,x:-4,y:origin,z:0},cell:{part:false,phase:'idle',outputs:{}},dt:0,running:false,product,layout});
   return model;
@@ -207,7 +207,7 @@ export function updateWorkstation(model,{pose,cell,dt=0,running=false,product,la
   q.carriage.position.z=q.rear*(1-q.travel);
   const safeTip=origin+product.height+.35;
   const sideTip=safeTip+(origin+product.height-.02-safeTip)*q.extension;
-  const depthY=safeTip+(origin+bottom+.018-safeTip)*q.extension;
+  const depthY=safeTip+(origin+bottom+.021-safeTip)*q.extension;
   for(const probe of q.sideProbes) {
     const top=q.bridgeY-.08, length=top-sideTip;
     probe.shaft.position.y=(top+sideTip)/2; probe.shaft.scale.y=length/.4;
