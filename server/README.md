@@ -27,14 +27,14 @@ Todas as mutações exigem `Origin` igual a `APP_ORIGIN` e
 `credentials: 'same-origin'` nos fetches pelo proxy. Fora de produção, sem
 APP_ORIGIN explícito, localhost:5173 e 127.0.0.1:5173 são permitidos.
 
-| Método e rota | Entrada | Sucesso |
-| --- | --- | --- |
-| POST `/api/auth/register` | `{name,email,enrollment,password}` | 201 `{user}` e cookie |
-| POST `/api/auth/login` | `{email,password}` | 200 `{user}` e cookie |
-| GET `/api/auth/me` | — | 200 `{user}` ou 401 |
-| POST `/api/auth/logout` | — | 200 `{message}` e cookie removido |
-| POST `/api/auth/forgot-password` | `{email}` | 200 `{message}` genérica |
-| POST `/api/auth/reset-password` | `{token,password}` | 200 `{message}` |
+| Método e rota                    | Entrada                            | Sucesso                           |
+| -------------------------------- | ---------------------------------- | --------------------------------- |
+| POST `/api/auth/register`        | `{name,email,enrollment,password}` | 201 `{user}` e cookie             |
+| POST `/api/auth/login`           | `{email,password}`                 | 200 `{user}` e cookie             |
+| GET `/api/auth/me`               | —                                  | 200 `{user}` ou 401               |
+| POST `/api/auth/logout`          | —                                  | 200 `{message}` e cookie removido |
+| POST `/api/auth/forgot-password` | `{email}`                          | 200 `{message}` genérica          |
+| POST `/api/auth/reset-password`  | `{token,password}`                 | 200 `{message}`                   |
 
 `user` contém somente `{id,name,email,enrollment}`. Erros usam `{error}` e status apropriado.
 Senha: 8 a 128 caracteres, sem regras artificiais de símbolos; espaços são preservados.
@@ -85,33 +85,54 @@ Referências: [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheats
 [Forgot Password](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html),
 [Node SQLite](https://nodejs.org/api/sqlite.html).
 
-## Matrícula e limites de tentativas
-
-Novos cadastros exigem `enrollment` como **string** de 3 a 30 caracteres:
-letras A–Z/a–z, números e hífen. Espaços externos são removidos; zeros iniciais
-são preservados. A matrícula é única sem distinguir maiúsculas de minúsculas.
-Não representa validação com uma base oficial do SENAI. O login continua por
-**e-mail e senha**. `user.enrollment` é devolvido no cadastro, login e `/me`.
-A migração adiciona a coluna de forma não destrutiva: contas anteriores mantêm
-`enrollment: null`, suas senhas e sessões, sem exigir matrícula no login.
-
-Todos os limites abaixo usam janela fixa. Ao exceder, a API devolve **429**,
-`{error}` e `Retry-After` em segundos até a liberação da janela. Solicitações
-inválidas também contam; o cliente não deve reenviar automaticamente.
-
-| Limite | Quantidade | Janela |
-| --- | --- | --- |
-| Todos os pedidos de autenticação por peer | 180 | 1 minuto |
-| Todas as mutações por peer | 45 | 1 minuto |
-| Cadastro por peer | 5 | 15 minutos |
-| Login por peer | 20 | 15 minutos |
-| Login por e-mail normalizado | 10 | 15 minutos |
-| Recuperação por peer | 10 | 15 minutos |
-| Redefinição por peer | 12 | 15 minutos |
-
-A recuperação ainda envia no máximo uma mensagem por conta por minuto,
-sem revelar se a conta existe. Os limites continuam em memória e reiniciam com
-o processo; para múltiplas instâncias aplique também limitação compartilhada no
-proxy. O frontend deve respeitar `Retry-After` e permitir nova tentativa após
-o prazo. A senha mínima para novos cadastros e redefinições é 8 caracteres;
-o máximo permanece 128. O algoritmo de hash e a proteção de sessão não mudaram.
+## Matrícula e limites de tentativas
+
+Novos cadastros exigem `enrollment` como **string** de 3 a 30 caracteres:
+
+letras A–Z/a–z, números e hífen. Espaços externos são removidos; zeros iniciais
+
+são preservados. A matrícula é única sem distinguir maiúsculas de minúsculas.
+
+Não representa validação com uma base oficial do SENAI. O login continua por
+
+**e-mail e senha**. `user.enrollment` é devolvido no cadastro, login e `/me`.
+
+A migração adiciona a coluna de forma não destrutiva: contas anteriores mantêm
+
+`enrollment: null`, suas senhas e sessões, sem exigir matrícula no login.
+
+Todos os limites abaixo usam janela fixa. Ao exceder, a API devolve **429**,
+
+`{error}` e `Retry-After` em segundos até a liberação da janela. Solicitações
+
+inválidas também contam; o cliente não deve reenviar automaticamente.
+
+| Limite | Quantidade | Janela |
+
+| --- | --- | --- |
+
+| Todos os pedidos de autenticação por peer | 180 | 1 minuto |
+
+| Todas as mutações por peer | 45 | 1 minuto |
+
+| Cadastro por peer | 5 | 15 minutos |
+
+| Login por peer | 20 | 15 minutos |
+
+| Login por e-mail normalizado | 10 | 15 minutos |
+
+| Recuperação por peer | 10 | 15 minutos |
+
+| Redefinição por peer | 12 | 15 minutos |
+
+A recuperação ainda envia no máximo uma mensagem por conta por minuto,
+
+sem revelar se a conta existe. Os limites continuam em memória e reiniciam com
+
+o processo; para múltiplas instâncias aplique também limitação compartilhada no
+
+proxy. O frontend deve respeitar `Retry-After` e permitir nova tentativa após
+
+o prazo. A senha mínima para novos cadastros e redefinições é 8 caracteres;
+
+o máximo permanece 128. O algoritmo de hash e a proteção de sessão não mudaram.
