@@ -10,17 +10,28 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
  const deck=layout.conveyorTop,halfDepth=Math.max(1.6,layout.package.depth/2+.35),roof=4.55;
  box(truck,0,.83,0,6.8,.24,halfDepth*2,m.dark,true);box(truck,0,deck-.07,0,6.8,.14,halfDepth*2,body);
  // A cutaway on the near side keeps loading visible; rear doors are opened away from the route.
- // Near-side roof cutaway keeps the cargo and its support levels readable.
- box(truck,0,roof,-halfDepth*.45,6.8,.1,halfDepth*1.1,body);
- box(truck,0,roof,halfDepth,6.8,.1,.08,m.steel);
+ // Continuous roof covers the entire cargo body; the open side preserves visibility.
+ const roofPanel=box(truck,0,roof,0,6.8,.1,halfDepth*2,body);
+ roofPanel.name='cargo-roof';
+
  truck.userData.cutaway=true;
  box(truck,0,(roof+deck)/2,-halfDepth,6.8,roof-deck,.07,body);
  for(let x=-3.2;x<3.4;x+=.32)box(truck,x,(roof+deck)/2,-halfDepth+.045,.025,roof-deck-.12,.015,m.white);
  box(truck,direction*3.35,(roof+deck)/2,0,.1,roof-deck,halfDepth*2,body);
+ // Small SENAI marks on both faces of the closed side wall.
+ const logoTexture=new THREE.TextureLoader().load('/senai-logo.png');
+ logoTexture.colorSpace=THREE.SRGBColorSpace;
+ const logoMaterial=new THREE.MeshBasicMaterial({map:logoTexture,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
+ for(const face of [-1,1]){
+  const logo=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.74),logoMaterial);
+  logo.position.set(0,3.05,-halfDepth+face*.041);
+  logo.rotation.y=face<0?Math.PI:0;
+  logo.name='senai-truck-logo';truck.add(logo);
+ }
  const doors=[];
  for(const z of [-halfDepth,halfDepth]){
-  box(truck,-direction*3.38,(roof+deck)/2,z,.1,roof-deck,.1,m.steel);
-  const door=new THREE.Group();door.position.set(-direction*3.44,deck,z);door.rotation.y=(z>0?1:-1)*direction*Math.PI*.55;truck.add(door);doors.push(door);
+  if(z<0)box(truck,-direction*3.38,(roof+deck)/2,z,.1,roof-deck,.1,m.steel);
+  const door=new THREE.Group();door.position.set(-direction*3.44,deck,z);door.rotation.y=(z>0?1:-1)*direction*Math.PI;truck.add(door);doors.push(door);
   const leaf=halfDepth-.06;
   box(door,-direction*leaf/2,(roof-deck)/2,0,leaf,roof-deck,.07,body);
   bar(door,[-direction*leaf*.75,.2,.055],[-direction*leaf*.75,roof-deck-.2,.055],.024,m.steel);
@@ -84,5 +95,5 @@ export function buildTruck({root,THREE,box,cyl,bar,m,shipping,layout}){
   for(const y of [.2,.45,.65])box(root,direction*5.35,y,z,.14,.045,.14,m.dark);
  }
  for(const x of [direction*2.48,direction*5.71])box(lift,x,deck+.002,layout.package.centerZ,.025,.004,layout.package.depth+.18,m.dark);
- return {truck,lift,doors,wheels,materials:[body,paint,rubber,windowMat,...lamps.values()]};
+ return {truck,lift,doors,wheels,materials:[body,paint,rubber,windowMat,logoMaterial,...lamps.values()],textures:[logoTexture]};
 }
