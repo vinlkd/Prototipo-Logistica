@@ -90,7 +90,9 @@ export function buildTruck({
     body,
   );
   // Small SENAI marks on both faces of the closed side wall.
-  const logoTexture = new THREE.TextureLoader().load("/senai-logo.png");
+  const logoTexture = new THREE.TextureLoader().load(
+    `${import.meta.env?.BASE_URL ?? "./"}senai-logo.png`,
+  );
   logoTexture.colorSpace = THREE.SRGBColorSpace;
   const logoMaterial = new THREE.MeshBasicMaterial({
     map: logoTexture,

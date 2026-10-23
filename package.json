@@ -10,7 +10,9 @@
     "test": "node --test tests/*.test.js",
     "start": "node --env-file-if-exists=.env server/index.js",
     "dev:client": "vite --host 127.0.0.1",
-    "dev:api": "node --env-file-if-exists=.env server/index.js"
+    "dev:api": "node --env-file-if-exists=.env server/index.js",
+    "build:pages": "vite build --mode pages",
+    "preview:pages": "vite preview --mode pages --host 127.0.0.1"
   },
   "dependencies": {
     "jose": "^6.2.13",
